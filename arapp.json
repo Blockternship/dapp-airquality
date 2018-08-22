@@ -1,0 +1,17 @@
+{
+  "appName": "kike.aragonpm.eth",
+  "version": "1.0.0",
+  "roles": [
+    {
+      "name": "Reporter",
+      "id": "REPORTER_ROLE",
+      "params": []
+    },
+    {
+      "name": "Donor",
+      "id": "DONOR_ROLE",
+      "params": []
+    }
+  ],
+  "path": "contracts/AirRewards.sol"
+}
