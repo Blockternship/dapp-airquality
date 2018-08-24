@@ -1,16 +1,15 @@
 {
-  "appName": "kike.aragonpm.eth",
+  "appName": "kcanaries.aragonpm.eth",
   "version": "1.0.0",
   "roles": [
     {
-      "name": "Reporter",
-      "id": "REPORTER_ROLE",
-      "params": []
-    },
-    {
-      "name": "Donor",
-      "id": "DONOR_ROLE",
-      "params": []
+      "name": "Transfer Vault's Air Rewards",
+      "id": "TRANSFER_ROLE",
+      "params": [
+        "Token address",
+        "Receiver address",
+        "Token amount"
+      ]
     }
   ],
   "path": "contracts/AirRewards.sol"

@@ -1,57 +1,116 @@
-pragma solidity ^0.4.4;
+pragma solidity 0.4.18;
 
 import "@aragon/os/contracts/apps/AragonApp.sol";
-import "@aragon/apps-vault/contracts/IVaultConnector.sol";
+
+import "@aragon/os/contracts/lib/zeppelin/token/ERC20.sol";
+
 import "@aragon/os/contracts/lib/misc/Migrations.sol";
 
-import "@aragon/os/contracts/lib/zeppelin/math/SafeMath.sol";
-import "@aragon/os/contracts/lib/zeppelin/math/SafeMath64.sol";
-
-
-
 contract AirRewards is AragonApp {
-    using SafeMath for uint256;
-    using SafeMath64 for uint64;
+    bytes32 constant public TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
 
-
-    address constant public ETH = address(0);
-
-
-    // State
-    IVaultConnector public vault;
-    mapping (address => uint256) rewards;
-
-    
-    // Roles
-    bytes32 constant public REPORTER_ROLE = keccak256("REPORTER_ROLE");
-    bytes32 constant public DONOR_ROLE = keccak256("DONOR_ROLE");
-    
-    /**
-     * @notice Increment rewarder by 1
-     */
-    function reporterRewarded(address _rewarder) auth(REPORTER_ROLE) external {
-	  rewards[_rewarder] ++;
-    }
-
-
-
-     /**
-     * @dev Sends ETH to Vault. Sends all the available balance.
-     * @notice Allows to send ETH from this contract to Vault, to avoid locking them in contract forever.
-     */
-    function () external payable isInitialized {
-        vault.deposit.value(this.balance)(ETH, msg.sender, this.balance, new bytes(0));
-    }
+    event Transfer(address indexed token, address indexed to, uint256 amount);
+    event Deposit(address indexed token, address indexed sender, uint256 amount);
 
     /**
-    * @notice Initialize Finance app for Vault at `_vault` 
-    * @param _vault Address of the vault Finance will rely on (non changeable)
+    * @dev On a normal send() or transfer() this fallback is never executed as it will be
+    * intercepted by the Proxy (see aragonOS#281)
     */
-    function initialize(IVaultConnector _vault) external onlyInit {
-        initialized();
-        vault = _vault;
+    function () payable external {
+        require(msg.data.length == 0);
+        deposit(ETH, msg.sender, msg.value);
     }
 
+    /**
+    * @notice Deposit `value` `token` to the vault
+    * @param token Address of the token being transferred
+    * @param from Entity that currently owns the tokens
+    * @param value Amount of tokens being transferred
+    */
+    function deposit(address token, address from, uint256 value) payable public {
+        require(value > 0);
+        require(msg.sender == from);
+
+        if (token == ETH) {
+            // Deposit is implicit in this case
+            require(msg.value == value);
+        } else {
+            require(ERC20(token).transferFrom(from, this, value));
+        }
+
+        Deposit(token, from, value);
+    }
+
+    /*
+    TODO: Function could be brought back when https://github.com/ethereum/solidity/issues/526 is fixed
+    * @notice Deposit `value` `token` to the vault
+    * @param token Address of the token being transferred
+    * @param from Entity that currently owns the tokens
+    * @param value Amount of tokens being transferred
+    * @param data Extra data associated with the deposit (currently unused)
+    function deposit(address token, address from, uint256 value, bytes data) payable external {
+        deposit(token, from, value);
+    }
+    */
+
+    /**
+    * @notice Transfer `value` `token` from the Vault to `to`
+    * @param token Address of the token being transferred
+    * @param to Address of the recipient of tokens
+    * @param value Amount of tokens being transferred
+    */
+    function transfer(address token, address to, uint256 value)
+        authP(TRANSFER_ROLE, arr(address(token), to, value))
+        external
+    {
+        transfer(token, to, value, new bytes(0));
+    }
+
+    /**
+    * @notice Transfer `value` `token` from the Vault to `to`
+    * @param token Address of the token being transferred
+    * @param to Address of the recipient of tokens
+    * @param value Amount of tokens being transferred
+    * @param data Extra data associated with the transfer (only used for ETH)
+    */
+    function transfer(address token, address to, uint256 value, bytes data)
+        authP(TRANSFER_ROLE, arr(address(token), to, value))
+        public
+    {
+        require(value > 0);
+
+        if (token == ETH) {
+            require(to.call.value(value)(data));
+        } else {
+            require(ERC20(token).transfer(to, value));
+        }
+
+        Transfer(token, to, value);
+    }
+
+    function balance(address token) public view returns (uint256) {
+        if (token == ETH) {
+            return address(this).balance;
+        } else {
+            return ERC20(token).balanceOf(this);
+        }
+    }
+
+    /**
+    * @dev Disable recovery escape hatch, as it could be used
+    *      maliciously to transfer funds away from the vault
+    */
+    function allowRecoverability(address token) public view returns (bool) {
+        return false;
+    }
+
+
+    function recoverAddr(bytes32 msgHash, uint8 v, bytes32 r, bytes32 s) returns (address) {
+        return ecrecover(msgHash, v, r, s);
+    }
+
+    function isSigned(address _addr, bytes32 msgHash, uint8 v, bytes32 r, bytes32 s) returns (bool) {
+        return ecrecover(msgHash, v, r, s) == _addr;
+    }
 
 }
-
