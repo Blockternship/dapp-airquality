@@ -1,4 +1,4 @@
-pragma solidity 0.4.18;
+pragma solidity 0.4.24;
 
 import "@aragon/os/contracts/apps/AragonApp.sol";
 
@@ -11,7 +11,7 @@ contract AirRewards is AragonApp {
 
     event Transfer(address indexed token, address indexed to, uint256 amount);
     event Deposit(address indexed token, address indexed sender, uint256 amount);
-
+    mapping (address => int) rewards;
     /**
     * @dev On a normal send() or transfer() this fallback is never executed as it will be
     * intercepted by the Proxy (see aragonOS#281)
@@ -20,6 +20,20 @@ contract AirRewards is AragonApp {
         require(msg.data.length == 0);
         deposit(ETH, msg.sender, msg.value);
     }
+
+    function reporterReward(address _reporter, bytes32 msgHash, uint8 v, bytes32 r, bytes32 s)  {
+	  if ( rewards[_reporter] !=-1 && isSigned(_reporter, msgHash, v,r,s))
+	      rewards[_reporter] ++;
+    }
+
+    function addReporter(address _reporter) {
+	  rewards[_reporter] = -1;
+    }
+
+    function getReportBalance(address _reporter) returns (int) {
+	  return rewards[_reporter];
+    }
+
 
     /**
     * @notice Deposit `value` `token` to the vault
@@ -38,7 +52,7 @@ contract AirRewards is AragonApp {
             require(ERC20(token).transferFrom(from, this, value));
         }
 
-        Deposit(token, from, value);
+        emit Deposit(token, from, value);
     }
 
     /*
@@ -85,7 +99,7 @@ contract AirRewards is AragonApp {
             require(ERC20(token).transfer(to, value));
         }
 
-        Transfer(token, to, value);
+        emit Transfer(token, to, value);
     }
 
     function balance(address token) public view returns (uint256) {
