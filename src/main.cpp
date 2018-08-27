@@ -74,6 +74,7 @@ void eth_send_example() {
     //string to = "";
     string func = "set(string)";
     string p = contract.SetupContractData(&func, &data);
+    USE_SERIAL.println(p.c_str());
     //string result = contract.SendTransaction(txcount, gasPriceVal, gasLimitVal, &toStr, &valueStr, &p);
     string result = contract.SendTransaction(txcount, gasPriceVal, gasLimitVal, &contractaddress, &valueStr, &p);
     //USE_SERIAL.println(result.c_str());
