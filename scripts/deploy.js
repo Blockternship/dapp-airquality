@@ -1,8 +1,5 @@
-module.exports = (cb) =>
-  artifacts.require(
-    require('../arapp').path
-  ).new()
-    .then((instance) => {
-      console.log(instance.address)
-      cb()
-    })
+module.exports = async callback => {
+  const c = await artifacts.require(require('../arapp').path).new()
+  console.log(c.address)
+  callback()
+}

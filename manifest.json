@@ -1,9 +1,9 @@
 {
-  "name": "Air Reward",
-  "description": "An application for Aragon",
+  "name": "AirRewards",
+  "description": "Securely owns and manages tokens on behalf of a DAO.",
   "icons": [{
-    "src": "/dist/images/icon.png",
-    "sizes": "22x22"
+    "src": "images/icon.png",
+    "sizes": "192x192"
   }],
   "start_url": "/dist/index.html",
   "script": "/dist/script.js"
