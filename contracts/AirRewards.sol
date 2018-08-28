@@ -7,10 +7,15 @@ import "@aragon/os/contracts/lib/zeppelin/token/ERC20.sol";
 import "@aragon/os/contracts/lib/misc/Migrations.sol";
 
 contract AirRewards is AragonApp {
+    constructor () {
+
+    }
+
     bytes32 constant public TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
 
     event Transfer(address indexed token, address indexed to, uint256 amount);
     event Deposit(address indexed token, address indexed sender, uint256 amount);
+    event ReporterAdded(address reporter);
     mapping (address => int) rewards;
     /**
     * @dev On a normal send() or transfer() this fallback is never executed as it will be
@@ -26,8 +31,9 @@ contract AirRewards is AragonApp {
 	      rewards[_reporter] ++;
     }
 
-    function addReporter(address _reporter) {
+    function addReporter(address _reporter)  public {
 	  rewards[_reporter] = -1;
+	  emit ReporterAdded(_reporter);
     }
 
     function getReportBalance(address _reporter) returns (int) {
