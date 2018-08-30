@@ -11,23 +11,37 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.Contract;
+import org.web3j.tx.ManagedTransaction;
 import org.web3j.tx.Transfer;
 import org.web3j.utils.Convert;
+import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -53,8 +67,46 @@ public class MainActivity extends AppCompatActivity {
             walletPathFile= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             connectEth();
             loadCredentials();
-            transferFunds();
+            //transferFunds();
+
         }
+
+    }
+
+    public void createOfflineTx(){
+        String set_contract_Address = BuildConfig.contract;
+        EthSendTransaction transactionResponse = null;
+        try {
+            Function function = new Function(
+                    "addReporter",
+                    Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(BuildConfig.reporter)),
+                    Collections.<TypeReference<?>>emptyList());
+
+            Future<EthGetTransactionCount> ethGetTransactionCount = web3.ethGetTransactionCount(
+                    credentials.getAddress(), DefaultBlockParameterName.LATEST)
+                    .sendAsync();
+            BigInteger count =ethGetTransactionCount.get().getTransactionCount();
+
+            Log.e("ETH",count.toString());
+
+            String encodedFunction = FunctionEncoder.encode(function);
+            RawTransaction rawTransaction = RawTransaction.createTransaction(
+                    count, ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT, set_contract_Address, BigInteger.ZERO,  encodedFunction);
+
+            byte[] signedMessage = TransactionEncoder.signMessage(rawTransaction, credentials);
+            String hexValue = Numeric.toHexString(signedMessage);
+
+            transactionResponse = web3.ethSendRawTransaction(hexValue).sendAsync().get();
+            Log.i("ETH", ("Transaction complete, view it at https://rinkeby.etherscan.io/tx/"
+                    + transactionResponse.getTransactionHash()));
+
+        } catch (InterruptedException e) {
+            Log.e("ERROR ETH INT",e.getMessage());
+        } catch (ExecutionException e) {
+            Log.e("ERROR ETH EXEC",e.getMessage() + Arrays.deepToString(e.getStackTrace()));
+        }
+
+
 
     }
 
@@ -88,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connectEth() {
-        web3 = Web3jFactory.build(new HttpService("https://rinkeby.infura.io/v3/apikey"));  // defaults to http://localhost:8545/
+        web3 = Web3jFactory.build(new HttpService(BuildConfig.infura));  // defaults to http://localhost:8545/
         Web3ClientVersion web3ClientVersion = null;
         try {
             web3ClientVersion = web3.web3ClientVersion().sendAsync().get();
@@ -96,9 +148,9 @@ public class MainActivity extends AppCompatActivity {
             Log.i("ETH", ("Connected to Ethereum client version: "
                     + clientVersion));
         } catch (InterruptedException e) {
-            Log.e("ETH",e.getMessage());
+            Log.e("ERROR ETH INT",e.getMessage());
         } catch (ExecutionException e) {
-            Log.e("ETH",e.getMessage());
+            Log.e("ERROR ETH EXEC",e.getMessage() + Arrays.deepToString(e.getStackTrace()));
         }
 
     }
@@ -107,9 +159,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             credentials =
                     WalletUtils.loadCredentials(
-                            "",
-                            new File(walletPathFile, ""));
-            Log.e("ETH", ("Credentials loaded Address is::: "+ credentials.getAddress()));
+                            BuildConfig.pass,
+                            new File(walletPathFile, BuildConfig.file));
+            Log.v("ETH", ("Credentials loaded Address is::: "+ credentials.getAddress()));
+            createOfflineTx();
         } catch (IOException e) {
             Log.e("ETH",e.getMessage());
         } catch (CipherException e) {
