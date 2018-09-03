@@ -1,18 +1,18 @@
-//const HDWalletProvider = require("truffle-hdwallet-provider");
-const HDWalletProvider = require("truffle-hdwallet-provider-privkey");
-const mnemonic = ["privatekey"];
+var PrivateKeyProvider = require("truffle-privatekey-provider");
+var config = require("./config").sec
+const infura = "" + config.infura;
+const privateKey = "" + config.privateKey;
 module.exports = {
     networks: {
-        development: {
-            host: "localhost",
-            port: 8545,
-            network_id: "*" // Match any network id
-        },
         rinkeby: {
-            provider: () => {
-                return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/token")
-            },
+            provider: new PrivateKeyProvider(privateKey, infura),
             network_id: 4
-        }
+        },
+        development: {
+            host: 'localhost',
+            port: 8545,
+            network_id: '*' // Match any network id
+        },
+
     }
 };

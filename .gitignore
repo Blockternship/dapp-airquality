@@ -20,4 +20,4 @@ Session.vim
 tags
 # Persistent undo
 [._]*.un~
-truffle.js
+config.js
