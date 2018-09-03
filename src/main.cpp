@@ -13,28 +13,20 @@ string path = INFURA_PATH;
 string account = AIRQUALITY_ADDRESS;
 string contractaddress = CONTRACT_ADDRESS;
 
-
-
-
 Web3 web3(&host, &path);
 
 void air_quality_report();
 
 void setup() {
     USE_SERIAL.begin(115200);
-
-
     WiFi.begin(ENV_SSID, ENV_WIFI_KEY);
-
     // attempt to connect to Wifi network:
     while (WiFi.status() != WL_CONNECTED) {
         Serial.print(".");
         // wait 1 second for re-trying
         delay(1000);
     }
-
     USE_SERIAL.println("Connected");
-
     air_quality_report();
 }
 
@@ -47,7 +39,7 @@ void air_quality_report() {
     char tmp[32];
     contract.SetPrivateKey(PRIVATE_KEY);
     
-    int txcount = web3.EthGetTransactionCount(&account);
+    int txcount = web3.EthGetTransactionCount(&account) ;
     USE_SERIAL.println("eth_getTransactionCount");
     memset(tmp, 0, 32);
     sprintf(tmp, "%d", txcount);
@@ -58,8 +50,8 @@ void air_quality_report() {
 
     string valueStr = "0x00";
     string toStr = "0x0000000000000000000000000000000000000000";
-    string func = "addReporter(address)";
-    string data = "0xbd344f93e0b10f1317855f1b77e2238f1531f4a4";
+    string func = "reporterReward(address)";
+    string data = "0x185234bA42d395e1D7Fa04E273005d54c8a690C0";
     string p = contract.SetupContractData(&func, &data);
     USE_SERIAL.println(p.c_str());
     string result = contract.SendTransaction(txcount, gasPriceVal, gasLimitVal, &contractaddress, &valueStr, &p);
