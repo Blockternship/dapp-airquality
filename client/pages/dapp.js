@@ -43,7 +43,8 @@ class Dapp extends React.Component {
 
   getEthRates = async () => {
     const eth = await fetch(`https://api.coinmarketcap.com/v1/ticker/ethereum/`).then( r => r.json()) 
-    this.setState({ eprice: parseInt(eth.price_usd) })
+    console.log(eth[0].price_usd)
+    this.setState({ eprice: parseInt(eth[0].price_usd) })
   };
 
   getValue = async () => {
@@ -79,7 +80,7 @@ class Dapp extends React.Component {
         >
 		<Button onClick={this.depositValue} type="primary" size='large'>Primary</Button>
 		<Button onClick={this.getValue} type="primary" size='large'>Primary</Button>
-		<Button onClick={this.addReporter} type="primary" size='large'>Dashed</Button>
+		<Button onClick={this.getEthRates} type="primary" size='large'>Dashed</Button>
 		<Button onClick={this.getReportBalance} type="primary" size='large'>Normal</Button>
         </FormItem>
 
