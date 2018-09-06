@@ -1,7 +1,14 @@
-module.exports = {
-  webpack: (config, { buildId, dev }) => {
-    // This allows the app to refer to files through our symlink
-    config.resolve.symlinks = false
-    return config
-  }
+/* eslint-disable */
+const withLess = require('@zeit/next-less')
+
+// fix: prevents error when .less files are required by node
+if (typeof require !== 'undefined') {
+  require.extensions['.less'] = (file) => {}
 }
+
+module.exports = withLess({
+  lessLoaderOptions: {
+    javascriptEnabled: true,
+  },
+})
+
