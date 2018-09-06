@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         EthSendTransaction transactionResponse = null;
         try {
             Function function = new Function(
-                    "addReporter",
+                    "reporterReward",
                     Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(BuildConfig.reporter)),
                     Collections.<TypeReference<?>>emptyList());
 
