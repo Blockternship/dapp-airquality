@@ -28,13 +28,11 @@ class Dapp extends React.Component {
     const weiDeposit = (usd / this.state.eprice ) * 1e18
     console.log(weiDeposit) 
     await contract.methods.depositEth().send( {value:  weiDeposit , from: accounts[0] })
-    alert('Stored 5 into account')
   }; 
   
   reporterReward = async () => {
     const { accounts, contract } = this.props
     await contract.methods.reporterReward("0x185234ba42d395e1d7fa04e273005d54c8a690c0").send({ from: accounts[0] })
-    alert('Stored 5 into account')
   };
  
   addReporter = async () => {
@@ -58,13 +56,13 @@ class Dapp extends React.Component {
   getValue = async () => {
     const { accounts, contract } = this.props
     const response = await contract.methods.getBalance().call({ from: accounts[0] })
-    this.setState({ balance: response })
+    this.setState({ balance: response / 1e18 })
   };
 
   getEthBalance = async () => {
     const { web3, accounts } = this.props
     const balanceInWei = await web3.eth.getBalance(accounts[0])
-    this.setState({ ethBalance: balanceInWei / 1e18 })
+    this.setState({ ethBalance: balanceInWei / 1e18 * 1.0 })
   };
 
   updateInputValue = async (evt) => {
@@ -102,9 +100,9 @@ class Dapp extends React.Component {
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 8 }}
         >
-		<Button onClick={ ()=> this.depositValue(10)} type="primary" size='large'>Deposit 10</Button>
-		<Button onClick={()=> this.depositValue(20)} type="primary" size='large'>Deposit 20 </Button>
-		<Button onClick={()=> this.depositValue(50)} type="primary" size='large'>Deposit 40</Button>
+		<Button onClick={ ()=> this.depositValue(1)} type="primary" size='large'>Deposit 10</Button>
+		<Button onClick={()=> this.depositValue(2)} type="primary" size='large'>Deposit 20 </Button>
+		<Button onClick={()=> this.depositValue(5)} type="primary" size='large'>Deposit 40</Button>
         </FormItem>
 
 	 <FormItem
@@ -112,7 +110,7 @@ class Dapp extends React.Component {
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 8 }} 
 	 >
-		<Card title="Air Quality Vaul" >{balance}</Card>
+		<Card title="Air Quality Vaul" >{balance} ETH </Card>
 		<Card title="Eth usd" >Ether USD: {eprice}</Card>
 
 	</FormItem>
