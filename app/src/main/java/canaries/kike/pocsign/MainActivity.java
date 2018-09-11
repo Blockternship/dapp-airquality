@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -40,6 +41,9 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -47,6 +51,10 @@ import java.util.concurrent.Future;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    static {
+        System.loadLibrary("signer");
+    }
 
     private Web3j web3;
     private File walletPathFile;
@@ -63,13 +71,21 @@ public class MainActivity extends AppCompatActivity {
             checkPermissions();
         }
 
-        synchronized (this) {
-            walletPathFile= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            connectEth();
-            loadCredentials();
+        //synchronized (this) {
+            //walletPathFile= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            walletPathFile = new File(this.getApplicationInfo().dataDir);
+
+            //createBIP39Wallet(this);
+
+            //connectEth();
+            //loadCredentialsBEP39();
             //transferFunds();
 
-        }
+        //}
+
+        TextView tv = (TextView) findViewById(R.id.sample_text);
+        String seed = randomPhrase(11);
+        tv.setText(ethkeyBrainwalletSecret(seed));
 
     }
 
@@ -110,6 +126,21 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void loadCredentialsBEP39() {
+        try {
+            credentials =
+                    WalletUtils.loadCredentials(
+                            "12345678",
+                            new File(walletPathFile, "heyapple"));
+            Log.v("ETH", ("Credentials loaded Address is::: "+ credentials.getAddress()));
+            createOfflineTx();
+        } catch (IOException e) {
+            Log.e("ETH",e.getMessage());
+        } catch (CipherException e) {
+            Log.e("ETH",e.getMessage());
+        }
+    }
+
 
 
 
@@ -123,6 +154,19 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    /* Should work on pc, android crash */
+    public void createBIP39Wallet(Context ctx) {
+        try {
+            WalletUtils.generateBip39Wallet("12345678", walletPathFile);
+        } catch (CipherException e) {
+            Log.e("ETH",e.getMessage());
+        } catch (IOException e) {
+            Log.e("ETH",e.getMessage());
+        }
+
+    }
+
 
     /* Should work on pc, android crash */
     public void createWallet(Context ctx) {
@@ -186,6 +230,86 @@ public class MainActivity extends AppCompatActivity {
             Log.e("ETH",""+ e.getMessage() + "" + e.getLocalizedMessage() + "" + e.toString());
         }
     }
+
+
+
+    public void brainWalletAddress(String seed) {
+        ethkeyBrainwalletAddress(seed);
+    }
+
+
+    public void brainWalletSecret(String seed) {
+        ethkeyBrainwalletSecret(seed);
+    }
+
+
+    public void brainWalletSign(String seed, String message) {
+        ethkeyBrainwalletSign(seed, message);
+    }
+
+
+    public void rlpItem(String rlp, int position) {
+        try {
+            ethkeyRlpItem(rlp, position);
+        } catch (Exception e) {
+
+        }
+    }
+
+
+    public void keccak(String data) {
+        ethkeyKeccak(data);
+    }
+
+
+    public void ethSign(String data) {
+        ethkeyEthSign(data);
+    }
+
+
+    public void blockiesIcon(String seed) {
+        ethkeyBlockiesIcon(seed);
+    }
+
+
+    public String randomPhrase(int words) {
+        String seed = ethkeyRandomPhrase(words);
+        return seed;
+    }
+
+
+    public void encryptData(String data, String password) {
+        ethkeyEncryptData(data, password);
+    }
+
+
+    public void decryptData(String data, String password) {
+        try {
+            ethkeyDecryptData(data, password);
+        } catch (Exception e) {
+
+        }
+    }
+
+    private static native String ethkeyBrainwalletAddress(String seed);
+
+    private static native String ethkeyBrainwalletSecret(String seed);
+
+    private static native String ethkeyBrainwalletSign(String seed, String message);
+
+    private static native String ethkeyRlpItem(String data, int position);
+
+    private static native String ethkeyKeccak(String data);
+
+    private static native String ethkeyEthSign(String data);
+
+    private static native String ethkeyBlockiesIcon(String seed);
+
+    private static native String ethkeyRandomPhrase(int words);
+
+    private static native String ethkeyEncryptData(String data, String password);
+
+    private static native String ethkeyDecryptData(String data, String password);
 
 
 }
