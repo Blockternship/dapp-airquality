@@ -214,6 +214,123 @@ pub mod android {
     env.new_object(exception, "()V", &[]).unwrap().into()
   }
 
+
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyBrainwalletAddress(env: JNIEnv, _: JClass, seed: JString) -> jstring {
+    let seed: String = env.get_string(seed).expect("Invalid seed").into();
+    let keypair = Brain::new(seed).generate().unwrap();
+    let java_address = env.new_string(format!("{:?}", keypair.address())).expect("Could not create java string");
+    java_address.into_inner()
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyBrainwalletSecret(env: JNIEnv, _: JClass, seed: JString) -> jstring {
+    let seed: String = env.get_string(seed).expect("Invalid seed").into();
+    let keypair = Brain::new(seed).generate().unwrap();
+    let java_secret = env.new_string(format!("{:?}", keypair.secret())).expect("Could not create java string");
+    java_secret.into_inner()
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyBrainwalletSign(env: JNIEnv, _: JClass, seed: JString, message: JString) -> jstring {
+    let seed: String = env.get_string(seed).expect("Invalid seed").into();
+    let message: String = env.get_string(message).expect("Invalid message").into();
+    let keypair = Brain::new(seed).generate().unwrap();
+    let message: Message = message.parse().unwrap();
+    let signature = sign(keypair.secret(), &message).unwrap();
+    let java_signature = env.new_string(format!("{}", signature)).expect("Could not create java string");
+    java_signature.into_inner()
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyRlpItem(env: JNIEnv, _: JClass, data: JString, position: jint) -> jstring {
+    let data: String = env.get_string(data).expect("Invalid seed").into();
+    match safe_rlp_item(&data, position as u32) {
+      Ok(result) => env.new_string(result).expect("Could not create java string").into_inner(),
+      Err(_) => {
+        let res = env.new_string("").expect("").into_inner();
+        env.throw(new_exception(&env)).unwrap();
+        res
+      },
+    }
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyKeccak(env: JNIEnv, _: JClass, data: JString) -> jstring {
+    let data: String = env.get_string(data).expect("Invalid seed").into();
+    let hex = data.from_hex().unwrap();
+    let mut res: [u8; 32] = [0; 32];
+    let mut keccak = Keccak::new_keccak256();
+    keccak.update(&hex);
+    keccak.finalize(&mut res);
+    env.new_string(res.to_hex()).expect("Could not create java string").into_inner()
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyEthSign(env: JNIEnv, _: JClass, data: JString) -> jstring {
+    let data: String = env.get_string(data).expect("Invalid seed").into();
+    let hex = data.from_hex().unwrap();
+    let message = format!("\x19Ethereum Signed Message:\n{}", hex.len()).into_bytes();
+    let mut res: [u8; 32] = [0; 32];
+    let mut keccak = Keccak::new_keccak256();
+    keccak.update(&message);
+    keccak.update(&hex);
+    keccak.finalize(&mut res);
+    env.new_string(res.to_hex()).expect("Could not create java string").into_inner()
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyBlockiesIcon(env: JNIEnv, _: JClass, seed: JString) -> jstring {
+    let seed: String = env.get_string(seed).expect("Invalid seed").into();
+    let icon = blockies_icon_in_base64(seed.into());
+    env.new_string(icon).expect("Could not create java string").into_inner()
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyRandomPhrase(env: JNIEnv, _: JClass, words: jint) -> jstring {
+    let words = wordlist::random_phrase(words as usize);
+    env.new_string(words).expect("Could not create java string").into_inner()
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyEncryptData(env: JNIEnv, _: JClass, data: JString, password: JString) -> jstring {
+    let data: String = env.get_string(data).expect("Invalid data").into();
+    let password: String = env.get_string(password).expect("Invalid password").into();
+    let crypto = Crypto::with_plain(data.as_bytes(), &password, 10240);
+    env.new_string(String::from(crypto)).expect("Could not create java string").into_inner()
+  }
+
+  #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyDecryptData(env: JNIEnv, _: JClass, data: JString, password: JString) -> jstring {
+    let data: String = env.get_string(data).expect("Invalid data").into();
+    let password: String = env.get_string(password).expect("Invalid password").into();
+    let crypto: Crypto = match data.parse() {
+      Ok(crypto) => crypto,
+      Err(_) => {
+        let result = env.new_string("").expect("first result to be created").into_inner();
+        env.throw(new_exception(&env)).expect("first throw failed");
+        return result
+      },
+    };
+
+    match crypto.decrypt(&password) {
+      Ok(decrypted) => {
+        env.new_string(String::from_utf8_unchecked(decrypted)).expect("Could not create java string").into_inner()
+      },
+      Err(_) => {
+        let result = env.new_string("").expect("second result to be created").into_inner();
+        env.throw(new_exception(&env)).expect("second throw failed");
+        result
+      },
+    }
+  }
+
+
+
+
+
+
   #[no_mangle]
   pub unsafe extern fn Java_canaries_kike_pocsign_MainActivity_ethkeyBrainwalletAddress(env: JNIEnv, _: JClass, seed: JString) -> jstring {
     let seed: String = env.get_string(seed).expect("Invalid seed").into();
@@ -444,4 +561,5 @@ mod tests {
     assert_eq!(safe_rlp_item(rlp, 5), Ok("".into()));
   }
 }
+
 

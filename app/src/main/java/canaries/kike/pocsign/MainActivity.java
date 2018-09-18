@@ -38,7 +38,9 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
@@ -48,6 +50,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
+import static junit.framework.Assert.assertTrue;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -84,10 +88,106 @@ public class MainActivity extends AppCompatActivity {
         //}
 
         TextView tv = (TextView) findViewById(R.id.sample_text);
-        String seed = randomPhrase(11);
-        tv.setText(ethkeyBrainwalletSecret(seed));
+        String seed = randomPhrase(12);
+        Log.e("ETH",seed);
+        String account= ethkeyBrainwalletAddress(seed);
+        final String label = seed.concat("\n"+ account);
+        tv.setText(label);
+        Log.e("ETH",account);
+        String privateSeed = encryptData(seed, "1");
+        Log.e("ETH",privateSeed);
+        File acc = new File(walletPathFile, "key.txt");
+        try {
+            acc.createNewFile();
+            writeToFile(acc, privateSeed, this);
+
+            loadCredentials("key.txt");
+        } catch (IOException e) {
+            Log.e("IO EXCEPT FILE CREATE ETH",e.getMessage());
+        }
+
 
     }
+
+
+    private void writeToFile(File file, String data,Context context) {
+        try {
+            FileOutputStream fOut = new FileOutputStream(file);
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fOut);
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
+
+    public void test(){
+
+        // we will create an offline tx
+        String seed = randomPhrase(12);
+        web3 = getWeb3();
+        Log.d("ETH",seed);
+        String account= "0x"+ ethkeyBrainwalletAddress(seed);
+        String privateSeed = encryptData(seed, "1");
+        Log.d("ETH",privateSeed);
+        Log.d("ETH", account);
+
+        String tx = createTx(web3, account);
+        Log.d("ETH",tx.substring(2));
+        Log.d("ETH",tx);
+        String pSeed = ethkeyDecryptData(privateSeed, "1");
+        Log.d("ETH",pSeed);
+        //String signed= ethkeyBrainwalletSign(seed, tx.substring(2));
+        //Log.d("ETH",signed);
+
+
+        //credentials = loadCredentials(seed,"12345678");
+    }
+
+
+    public String createTx( Web3j web3, String address) {
+        String set_contract_Address = BuildConfig.contract;
+        EthSendTransaction transactionResponse = null;
+        try {
+            Function function = new Function(
+                    "reporterReward",
+                    Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(BuildConfig.reporter)),
+                    Collections.<TypeReference<?>>emptyList());
+
+            Future<EthGetTransactionCount> ethGetTransactionCount = web3.ethGetTransactionCount(
+                    address, DefaultBlockParameterName.LATEST)
+                    .sendAsync();
+            BigInteger count =ethGetTransactionCount.get().getTransactionCount();
+
+            Log.e("ETH",count.toString());
+
+            String encodedFunction = FunctionEncoder.encode(function);
+            RawTransaction rawTransaction = RawTransaction.createTransaction(
+                    count, ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT, set_contract_Address, BigInteger.ZERO,  encodedFunction);
+
+            byte[] encoded = TransactionEncoder.encode(rawTransaction);
+            String hexValue = Numeric.toHexString(encoded);
+            //return  new String(encoded);
+            return hexValue;
+
+        } catch (InterruptedException e) {
+            Log.e("ERROR ETH INT",e.getMessage());
+        } catch (ExecutionException e) {
+            Log.e("ERROR ETH EXEC",e.getMessage() + Arrays.deepToString(e.getStackTrace()));
+        }
+        return null;
+    }
+
+
+    public Web3j getWeb3() {
+        Web3j web3 = Web3jFactory.build(new HttpService(BuildConfig.infura));  // defaults to http://localhost:8545/
+        return web3;
+    }
+
+
+
 
     public void createOfflineTx(){
         String set_contract_Address = BuildConfig.contract;
@@ -199,18 +299,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void loadCredentials() {
+    public void loadCredentials(String file) {
         try {
             credentials =
                     WalletUtils.loadCredentials(
-                            BuildConfig.pass,
-                            new File(walletPathFile, BuildConfig.file));
+                            "1",
+                            new File(walletPathFile, file));
             Log.v("ETH", ("Credentials loaded Address is::: "+ credentials.getAddress()));
             createOfflineTx();
         } catch (IOException e) {
-            Log.e("ETH",e.getMessage());
+            Log.e("IO EXCEPT ETH",e.getMessage());
         } catch (CipherException e) {
-            Log.e("ETH",e.getMessage());
+            Log.e("CIPHER EXCEPT ETH",e.getMessage());
         }
     }
 
@@ -278,8 +378,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void encryptData(String data, String password) {
-        ethkeyEncryptData(data, password);
+    public String encryptData(String data, String password) {
+        return ethkeyEncryptData(data, password);
     }
 
 
