@@ -28,7 +28,7 @@ mod string;
 use rustc_serialize::hex::{ToHex, FromHex};
 use rustc_serialize::base64::{self, ToBase64};
 use tiny_keccak::Keccak;
-use ethkey::{KeyPair, Generator, Brain, Message, sign};
+use ethkey::{KeyPair, Generator, Brain, Message, sign, Random};
 use ethstore::Crypto;
 use rlp::UntrustedRlp;
 use blockies::{Blockies, create_icon, ethereum};
@@ -225,10 +225,18 @@ pub mod android {
   }
 
   #[no_mangle]
+  pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyRandomSecret(env: JNIEnv, _: JClass) -> jstring {
+    let keypair = Random.generate().unwrap();
+    let java_secret = env.new_string(format!("{:?}", keypair.secret())).expect("Could not create java string");
+    java_secret.into_inner()
+  }
+  
+  #[no_mangle]
   pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyBrainwalletSecret(env: JNIEnv, _: JClass, seed: JString) -> jstring {
     let seed: String = env.get_string(seed).expect("Invalid seed").into();
     let keypair = Brain::new(seed).generate().unwrap();
-    let java_secret = env.new_string(format!("{:?}", keypair.secret())).expect("Could not create java string");
+    let secret = keypair.secret().to_hex();
+    let java_secret = env.new_string(format!("{}",secret)).expect("Could not create java string");
     java_secret.into_inner()
   }
 
@@ -242,6 +250,7 @@ pub mod android {
     let java_signature = env.new_string(format!("{}", signature)).expect("Could not create java string");
     java_signature.into_inner()
   }
+
 
   #[no_mangle]
   pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyRlpItem(env: JNIEnv, _: JClass, data: JString, position: jint) -> jstring {
@@ -357,6 +366,8 @@ pub mod android {
     let java_signature = env.new_string(format!("{}", signature)).expect("Could not create java string");
     java_signature.into_inner()
   }
+
+
 
   #[no_mangle]
   pub unsafe extern fn Java_canaries_kike_pocsign_MainActivity_ethkeyRlpItem(env: JNIEnv, _: JClass, data: JString, position: jint) -> jstring {
@@ -561,5 +572,6 @@ mod tests {
     assert_eq!(safe_rlp_item(rlp, 5), Ok("".into()));
   }
 }
+
 
 
