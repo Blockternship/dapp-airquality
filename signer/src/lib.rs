@@ -227,6 +227,7 @@ pub mod android {
   #[no_mangle]
   pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyRandomSecret(env: JNIEnv, _: JClass) -> jstring {
     let keypair = Random.generate().unwrap();
+    let secret = keypair.secret().to_hex();
     let java_secret = env.new_string(format!("{:?}", keypair.secret())).expect("Could not create java string");
     java_secret.into_inner()
   }
@@ -235,7 +236,6 @@ pub mod android {
   pub unsafe extern fn Java_canaries_kike_pocsign_WalletTest_ethkeyBrainwalletSecret(env: JNIEnv, _: JClass, seed: JString) -> jstring {
     let seed: String = env.get_string(seed).expect("Invalid seed").into();
     let keypair = Brain::new(seed).generate().unwrap();
-    let secret = keypair.secret().to_hex();
     let java_secret = env.new_string(format!("{}",secret)).expect("Could not create java string");
     java_secret.into_inner()
   }
