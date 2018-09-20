@@ -20,6 +20,7 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
+import org.web3j.crypto.Keys;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.crypto.TransactionEncoder;
 import org.web3j.crypto.Wallet;
@@ -29,6 +30,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jFactory;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -42,7 +44,12 @@ import org.web3j.utils.Numeric;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,6 +75,7 @@ public class WalletTest {
     private WalletFile walletFile;
     private File walletPathFile;
     private String tx;
+    private String wFile;
 
     private static native String ethkeyBrainwalletAddress(String seed);
     private static native String ethkeyRandomSecret();
@@ -87,9 +95,11 @@ public class WalletTest {
         System.loadLibrary("signer");
     }
 
-    private void genWallet(){
+    private String genWallet(){
         try {
-            walletFile = Wallet.createLight("12345678", ECKeyPair.create(Numeric.toBigInt(privateSeed)));
+            ECKeyPair ecKeyPair = Keys.createEcKeyPair();
+            //walletFile = Wallet.createLight("12345678", ECKeyPair.create(Numeric.toBigInt(privateSeed)));
+            walletFile = Wallet.createLight("12345678", ecKeyPair);
             ObjectMapper objectMapper = new ObjectMapper();
             Context appContext = InstrumentationRegistry.getTargetContext();
             walletPathFile = new File(appContext.getApplicationInfo().dataDir);
@@ -98,12 +108,20 @@ public class WalletTest {
             File destination = new File(walletPathFile, fileName);
             try {
                 objectMapper.writeValue(destination, walletFile);
+                return fileName;
             } catch (IOException e) {
                 Log.e("IO EXCEPTION ETH",e.getMessage());
             }
         } catch (CipherException e) {
             Log.e("ETH",e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            Log.e("ETH",e.getMessage());
+        } catch (NoSuchProviderException e) {
+            Log.e("ETH",e.getMessage());
+        } catch (InvalidAlgorithmParameterException e) {
+            Log.e("ETH",e.getMessage());
         }
+        return null;
     }
 
 
@@ -119,13 +137,13 @@ public class WalletTest {
         return hexValue;
     }
 
-    public RawTransaction createRawTX( Web3j web3, String address){
+    public RawTransaction createRawTX( Web3j web3, String address, String fx){
         String set_contract_Address = BuildConfig.contract;
         EthSendTransaction transactionResponse = null;
         try {
             Function function = new Function(
-                    "reporterReward",
-                    Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(BuildConfig.reporter)),
+                    fx,
+                    Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(address)),
                     Collections.<TypeReference<?>>emptyList());
             Future<EthGetTransactionCount> ethGetTransactionCount = web3.ethGetTransactionCount(
                     address, DefaultBlockParameterName.LATEST)
@@ -152,8 +170,9 @@ public class WalletTest {
         return c.getAddress();
     }
 
-    private String createOfflineTx() {
-        RawTransaction rawTX = createRawTX(web3, credentials.getAddress());
+
+    private String createOfflineContracReporterstTx(String reporter, String function) {
+        RawTransaction rawTX = createRawTX(web3, reporter, function);
         String signedTx= signTx(rawTX);
         return signedTx;
     }
@@ -171,26 +190,86 @@ public class WalletTest {
         }
         return null;
     }
+
     @Before public void setup(){
         seed = randomPhrase(12);
         web3 = connectEth();
-        privateSeed = ethkeyBrainwalletSecret(seed);
-        //genWallet();
+        //privateSeed = ethkeyBrainwalletSecret(seed);
+        //wFile = genWallet();
         Log.d(TAG,  seed+ " " + privateSeed );
     }
 
+    public String getAccountBalance( Web3j web3, String address){
+        try {
+            Future<EthGetBalance> ethGetBalance = web3.ethGetBalance(
+                    address, DefaultBlockParameterName.LATEST)
+                    .sendAsync();
+            BigInteger value = ethGetBalance.get().getBalance();
+            BigDecimal balance = new BigDecimal(value.toString());
+            BigDecimal weiEth = new BigDecimal(1e18);
+            balance = balance.divide(weiEth, MathContext.DECIMAL32);
+            return balance.toString();
+        } catch (InterruptedException e) {
+            Log.e("ERROR ETH INT",e.getMessage());
+        } catch (ExecutionException e) {
+            Log.e("ERROR ETH EXEC",e.getMessage() + Arrays.deepToString(e.getStackTrace()));
+        }
+        return null;
+    }
+
     @Test
-    public void testSign() {
+    public void web3_reporterBalance() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
         walletPathFile = new File(appContext.getApplicationInfo().dataDir);
         String fileName = "UTC--2018-09-18T10-43-39.158--008ad1fa31cc3697b7036bbda630f75809124d2c.json";
         credentials = loadCredentials(fileName);
-        tx = createOfflineTx();
-        Log.d(TAG, credentials.getAddress());
-        assertTrue(tx.length() > 0);
-
+        String balance = getAccountBalance(web3, credentials.getAddress());
+        Log.e("balance is", balance);
+        assertTrue(balance.length() > 0);
     }
+
+    @Test
+    public void contractFx_addReporter() {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        walletPathFile = new File(appContext.getApplicationInfo().dataDir);
+        String fileName = "UTC--2018-09-18T10-43-39.158--008ad1fa31cc3697b7036bbda630f75809124d2c.json";
+        credentials = loadCredentials(fileName);
+        String tx_reporter = createOfflineContracReporterstTx(credentials.getAddress(), "addReporter");
+        sendRawSignedTx(tx_reporter);
+        assertTrue(tx_reporter.length() > 0);
+    }
+
+    @Test
+    public void contractFx_reporterReward() {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        walletPathFile = new File(appContext.getApplicationInfo().dataDir);
+        String fileName = "UTC--2018-09-18T10-43-39.158--008ad1fa31cc3697b7036bbda630f75809124d2c.json";
+        credentials = loadCredentials(fileName);
+        String tx_reporter = createOfflineContracReporterstTx(credentials.getAddress(), "reporterReward");
+        sendRawSignedTx(tx_reporter);
+        assertTrue(tx_reporter.length() > 0);
+    }
+
+
+    public void sendRawSignedTx(String offlineTx) {
+        // Context of the app under test.
+        Log.d(TAG, credentials.getAddress());
+        EthSendTransaction transactionResponse = null;
+        try {
+            transactionResponse = web3.ethSendRawTransaction(offlineTx).sendAsync().get();
+            Log.i("ETH", ("Transaction complete, view it at https://rinkeby.etherscan.io/tx/"
+                    + transactionResponse.getTransactionHash()));
+            assertTrue(transactionResponse.getTransactionHash().length() > 0);
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+        } catch (ExecutionException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
     @Test
     public void testSendRawSignedTx() {
         // Context of the app under test.
@@ -198,7 +277,6 @@ public class WalletTest {
         walletPathFile = new File(appContext.getApplicationInfo().dataDir);
         String fileName = "UTC--2018-09-18T10-43-39.158--008ad1fa31cc3697b7036bbda630f75809124d2c.json";
         credentials = loadCredentials(fileName);
-        tx = createOfflineTx();
         Log.d(TAG, credentials.getAddress());
         EthSendTransaction transactionResponse = null;
         try {
@@ -211,8 +289,6 @@ public class WalletTest {
         } catch (ExecutionException e) {
             Log.e(TAG, e.getMessage());
         }
-
-
     }
 
 
