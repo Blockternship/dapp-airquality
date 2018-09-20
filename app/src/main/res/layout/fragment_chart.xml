@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/lc_measures"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/rl_separator"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="30dp" />
+
+
+    <RelativeLayout
+        android:id="@+id/rl_separator"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/app_picker_card_height"
+        android:layout_marginLeft="10dp"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible">
+
+        <TextView
+            android:id="@+id/tv_chart_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="20180816.201344"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/tv_chart_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_chart_name"
+            android:text="20180816.201344"
+            android:textSize="18sp"
+            android:textColor="@color/black" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
