@@ -51,9 +51,7 @@ contract Vault is Pausable {
         require(_amount > 0);
         ERC20 token = ERC20(_tokenAddress);
         require (token.balanceOf(this) >= _amount);
-
         emit TokenWithdrawn(_tokenAddress, _receiver, _amount);
-
         require(token.transfer(_receiver, _amount));
     }
 
@@ -71,14 +69,17 @@ contract Vault is Pausable {
 	  // TODO: reward system by itself is a contract. 
 	  uint256 reporter_rewards = rewards[_reporter];
 	  uint256 is_rewarded = reporter_rewards.mod(3);
-	  if (is_rewarded == 0) withdrawEth(10, _reporter);
+	  if (is_rewarded == 0) withdrawEth(2.26e16, _reporter);
 	  emit Reward(rewards[_reporter], _reporter);
     }
 
 
     function addReporter(address _reporter)  public {
+	  require (exist[_reporter] == false);
 	  exist[_reporter] = true;
 	  emit ReporterAdded(_reporter);
+	  withdrawEth(1.26e16, _reporter);
+
     }
 
     function getReportBalance(address _reporter) public  returns (uint256) {
