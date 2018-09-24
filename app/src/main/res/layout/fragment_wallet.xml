@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+
+    <RelativeLayout
+        android:id="@+id/rl_separator"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:layout_alignParentBottom="true"
+        >
+
+        <TextView
+            android:id="@+id/tv_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="address"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/tv_balance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="balance"
+            android:textSize="18sp"
+            android:layout_below="@id/tv_address"
+            android:textColor="@color/black" />
+
+
+        <EditText
+            android:id="@+id/et_pwd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="input password"
+            android:inputType="textPassword"
+            android:textSize="18sp"
+            android:layout_below="@id/tv_balance"
+            android:textColor="@color/black" />
+
+        <Button
+            android:id="@+id/bt_create_wallet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/et_pwd"
+            android:text="Save-Refresh Wallet"
+            android:textSize="18sp"
+            android:textColor="@color/black" />
+
+        <Button
+            android:id="@+id/bt_check_balance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="update balance"
+            android:layout_below="@id/bt_create_wallet"
+            android:textSize="18sp"
+            android:textColor="@color/black" />
+
+        <Button
+            android:id="@+id/bt_send_tx"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/bt_check_balance"
+            android:text="Send tx. test"
+            android:textSize="18sp"
+            android:textColor="@color/black" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

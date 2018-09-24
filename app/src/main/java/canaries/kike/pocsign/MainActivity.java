@@ -8,53 +8,20 @@ import android.os.Environment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.ECKeyPair;
-import org.web3j.crypto.RawTransaction;
-import org.web3j.crypto.TransactionEncoder;
-import org.web3j.crypto.WalletUtils;
+
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.Web3jFactory;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.core.methods.response.Web3ClientVersion;
-import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.Contract;
-import org.web3j.tx.ManagedTransaction;
-import org.web3j.tx.Transfer;
-import org.web3j.utils.Convert;
-import org.web3j.utils.Numeric;
+
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import static junit.framework.Assert.assertTrue;
 
 
-public class MainActivity extends AppCompatActivity {
+import butterknife.ButterKnife;
+import canaries.kike.pocsign.view.WalletFragment;
+
+
+public class MainActivity extends BaseActivity {
 
     static {
         System.loadLibrary("signer");
@@ -65,15 +32,34 @@ public class MainActivity extends AppCompatActivity {
     private Credentials credentials;
     private File account;
     private File key;
+    private WalletFragment walletFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         synchronized (this) {
+
             checkPermissions();
+            ButterKnife.bind(this);
+            addWalletFragment();
+
         }
+    }
+
+    private void addWalletFragment() {
+        if (walletFragment == null) walletFragment = walletFragment.newInstance();
+        addFragment(walletFragment, walletFragment.TAG, false);
+    }
+
+
+    private void setupUI() {
+            addWalletFragment();
+            //showFragment(scanFragment);
+
     }
 
     private void checkPermissions(){
@@ -99,4 +85,8 @@ public class MainActivity extends AppCompatActivity {
     private static native String ethkeyDecryptData(String data, String password);
 
 
+    @Override
+    void onPermissionGranted() {
+
+    }
 }
