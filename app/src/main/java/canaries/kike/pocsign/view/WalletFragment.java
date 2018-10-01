@@ -5,13 +5,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
@@ -21,13 +20,18 @@ import org.web3j.protocol.Web3j;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import canaries.kike.pocsign.R;
+import canaries.kike.pocsign.api.GitHubApi;
+import canaries.kike.pocsign.api.ResponseCallback;
 import canaries.kike.pocsign.crypto.CryptoUtils;
+import okhttp3.ResponseBody;
 
 
 /**
  * Created by Antonio Vanegas @hpsaturn on 6/30/18.
  */
 public class WalletFragment extends Fragment  implements View.OnClickListener{
+
+    private static final String GITHUB_USER = "hi";
 
     public static String TAG = WalletFragment.class.getSimpleName();
     private static Context context;
@@ -51,6 +55,10 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
     @BindView(R.id.bt_send_tx)
     Button bt_tx;
 
+    @BindView(R.id.progress_bar)
+    ProgressBar pb_loader;
+
+
 
     private int i;
     private long referenceTimestamp;
@@ -61,6 +69,7 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
     private String walletFile;
     private static Credentials credentials;
     private static Web3j web3;
+    private boolean networkCallIsInProgress;
 
     public static WalletFragment newInstance() {
         WalletFragment fragment = new WalletFragment();
@@ -124,6 +133,44 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
         CryptoUtils.sendRawSignedTx(web3, tx_reporter, credentials);
     }
 
+    private void syncUI() {
+        if (networkCallIsInProgress) {
+            pb_loader.setVisibility(View.VISIBLE);
+        } else {
+            pb_loader.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void setNetworkCallInProgress(final boolean inProgress) {
+        networkCallIsInProgress = inProgress;
+        syncUI();
+    }
+
+
+    private void makeNetworkCall() {
+       // setNetworkCallInProgress(true);
+
+        final GitHubApi gitHubApi = GitHubApi.getSharedInstance();
+
+        gitHubApi.createIssue(new ResponseCallback<ResponseBody>() {
+            @Override
+            public void onSuccess(@NonNull ResponseBody result) {
+
+            }
+
+            @Override
+            public void onError() {
+
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
+        });
+    }
+
+
 
     @Override
     public void onClick(View v) {
@@ -135,7 +182,8 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
                 touchWallet(v);
                 break;
             case R.id.bt_send_tx:
-                sendTx(v);
+                //sendTx(v);
+                makeNetworkCall();
                 break;
 
         }
