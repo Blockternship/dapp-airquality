@@ -1,6 +1,6 @@
-const Vault = artifacts.require('./Vault.sol')
+const AirRewards = artifacts.require('./AirRewards.sol')
 
 module.exports = function (deployer) {
-  deployer.deploy(Vault)
+  deployer.deploy(AirRewards)
 }
 
