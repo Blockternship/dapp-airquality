@@ -1,0 +1,2 @@
+./gradlew installAirqDebug
+adb shell am start -n canaries.kike.pocsign/canaries.kike.pocsign.MainActivity

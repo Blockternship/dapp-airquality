@@ -78,6 +78,16 @@
             android:textSize="18sp"
             android:textColor="@color/black" />
 
+	<Button
+            android:id="@+id/bt_create_issue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/bt_send_tx"
+            android:text="Issue"
+            android:textSize="18sp"
+            android:textColor="@color/black" />
+
+
     </RelativeLayout>
 
 </RelativeLayout>

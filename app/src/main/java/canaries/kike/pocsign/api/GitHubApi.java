@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
+import canaries.kike.pocsign.BuildConfig;
 import okhttp3.Credentials;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -30,9 +31,10 @@ public final class GitHubApi {
     }
 
 
-    public void createIssue(@NonNull final ResponseCallback<ResponseBody> callback) {
-        Call<ResponseBody> call = service.createIssue(new Issue("Reporter applicant 1", "issue for adding new reporters"),
-                Credentials.basic("airqbot","6fc8802aaefa0b7bd2d0ce1234b892e80ecf5cdb"));
+    public void createIssue(@NonNull final ResponseCallback<ResponseBody> callback, String body) {
+
+        Call<ResponseBody> call = service.createIssue(new Issue("Reporter applicant 1", body),
+                Credentials.basic("airqbot",BuildConfig.ghbot));
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override

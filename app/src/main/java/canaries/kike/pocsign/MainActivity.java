@@ -1,6 +1,7 @@
 package canaries.kike.pocsign;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -15,7 +16,19 @@ import org.web3j.protocol.Web3j;
 
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 import butterknife.ButterKnife;
 import canaries.kike.pocsign.view.WalletFragment;
@@ -50,6 +63,48 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+/*
+    TODO: create lets encrypt cert for this.
+    private  SSLContext getSSLConfig(Context context) {
+        Certificate ca;
+        try {
+            // Loading CAs from an InputStream
+            CertificateFactory cf = null;
+            cf = CertificateFactory.getInstance("X.509");
+            //InputStream cert = context.getResources().openRawResource(R.raw.);
+            InputStream cert = context.getResources().openRawResource(1);
+            ca = cf.generateCertificate(cert);
+            // Creating a KeyStore containing our trusted CAs
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca", ca);
+
+            // Creating a TrustManager that trusts the CAs in our KeyStore.
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keyStore);
+
+            // Creating an SSLSocketFactory that uses our TrustManager
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, tmf.getTrustManagers(), null);
+
+            return sslContext;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+*/
     private void addWalletFragment() {
         if (walletFragment == null) walletFragment = walletFragment.newInstance();
         addFragment(walletFragment, walletFragment.TAG, false);

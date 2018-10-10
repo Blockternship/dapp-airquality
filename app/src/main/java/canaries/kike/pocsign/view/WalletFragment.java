@@ -55,6 +55,10 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
     @BindView(R.id.bt_send_tx)
     Button bt_tx;
 
+    @BindView(R.id.bt_create_issue)
+    Button bt_issue;
+
+
     @BindView(R.id.progress_bar)
     ProgressBar pb_loader;
 
@@ -67,9 +71,9 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
     public static final String KEY_RECORD_ID = "key_record_id";
     private String recordId;
     private String walletFile;
-    private static Credentials credentials;
     private static Web3j web3;
     private boolean networkCallIsInProgress;
+    private String address;
 
     public static WalletFragment newInstance() {
         WalletFragment fragment = new WalletFragment();
@@ -92,6 +96,7 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
         bt_balance.setOnClickListener(this);
         bt_tx.setOnClickListener(this);
         bt_wallet.setOnClickListener(this);
+        bt_issue.setOnClickListener(this);
         return view;
     }
 
@@ -111,9 +116,9 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
     }
 
     public void touchWallet(View view) {
-        String walletFile = CryptoUtils.genWallet(context, et_pwd.getText().toString());
-        credentials = CryptoUtils.loadCredentials(context, walletFile, et_pwd.getText().toString());
-        String address = credentials.getAddress();
+        walletFile = CryptoUtils.genWallet(context, et_pwd.getText().toString());
+        Credentials credentials = CryptoUtils.loadCredentials(context, walletFile, et_pwd.getText().toString());
+        address = credentials.getAddress();
         web3 = CryptoUtils.connectEth();
         String balance = CryptoUtils.getAccountBalance(web3,address);
         tv_address.setText(address);
@@ -121,15 +126,16 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
     }
 
     public void sendTx(View view) {
-        web3 = CryptoUtils.connectEth();
-        String address = credentials.getAddress();
+        //web3 = CryptoUtils.connectEth();
+        //String address = credentials.getAddress();
         String balance = CryptoUtils.getAccountBalance(web3, address);
         tv_balance.setText(balance);
 
     }
 
     public void updateBalance(View view) {
-        String tx_reporter = CryptoUtils.createOfflineContracReporterstTx(web3, "addReporter", credentials);
+        Credentials credentials = CryptoUtils.loadCredentials(context, walletFile, et_pwd.getText().toString());
+        String tx_reporter = CryptoUtils.createOfflineContracReporterstTx(web3, "reporterReward", credentials);
         CryptoUtils.sendRawSignedTx(web3, tx_reporter, credentials);
     }
 
@@ -146,13 +152,16 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
         syncUI();
     }
 
-
     private void makeNetworkCall() {
        // setNetworkCallInProgress(true);
-
+        //String address = credentials.getAddress();
+        String yamlBody = String.format(
+                "name: AIRQ bot testing reports\n" +
+                "motivation: im a bot testing airquality reports\n" +
+                "address: '%s'", address);
         final GitHubApi gitHubApi = GitHubApi.getSharedInstance();
 
-        gitHubApi.createIssue(new ResponseCallback<ResponseBody>() {
+        ResponseCallback<ResponseBody> cbGithub = new ResponseCallback<ResponseBody>() {
             @Override
             public void onSuccess(@NonNull ResponseBody result) {
 
@@ -167,7 +176,8 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
             public void onFailure() {
 
             }
-        });
+        };
+        gitHubApi.createIssue(cbGithub, yamlBody);
     }
 
 
@@ -182,9 +192,12 @@ public class WalletFragment extends Fragment  implements View.OnClickListener{
                 touchWallet(v);
                 break;
             case R.id.bt_send_tx:
-                //sendTx(v);
+                sendTx(v);
+                break;
+	   case R.id.bt_create_issue:
                 makeNetworkCall();
                 break;
+
 
         }
 

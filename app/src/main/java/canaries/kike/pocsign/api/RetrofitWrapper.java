@@ -2,6 +2,8 @@ package canaries.kike.pocsign.api;
 
 import android.support.annotation.NonNull;
 
+import javax.net.ssl.SSLContext;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -34,4 +36,16 @@ final class RetrofitWrapper {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         return new OkHttpClient.Builder().addInterceptor(interceptor).build();
     }
+
+
+    @NonNull
+    private static OkHttpClient getSecureClient(SSLContext context) {
+        final HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient.Builder client = new OkHttpClient.Builder().sslSocketFactory(context.getSocketFactory())
+                .addInterceptor(interceptor);
+        return client.build();
+    }
+
+
 }

@@ -17,6 +17,7 @@ public interface GitHubService {
 
 
 
+    //@POST("repos/JanisIOT/JanisEsp8266/issues")
     @POST("repos/kike-canaries/dapp-airquality/issues")
     @Headers({
             contentType,

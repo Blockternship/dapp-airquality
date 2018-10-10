@@ -117,6 +117,7 @@ public class CryptoUtils {
                 Collections.<TypeReference<?>>emptyList());
         BigInteger count = nonce(web3,address);
         String encodedFunction = FunctionEncoder.encode(function);
+	
         RawTransaction rawTransaction = RawTransaction.createTransaction(
                 count, ManagedTransaction.GAS_PRICE, Contract.GAS_LIMIT, set_contract_Address, BigInteger.ZERO,  encodedFunction);
         return rawTransaction;
