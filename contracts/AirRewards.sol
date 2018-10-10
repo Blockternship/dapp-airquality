@@ -23,12 +23,16 @@ contract AirRewards is Pausable {
     
    function depositEth() public payable  {
         Vault v = Vault(vault);
-	v.depositEth();
+	v.depositEth.value(msg.value)();
    }
 
    function getBalance() public view returns(uint) {
 	Vault v = Vault(vault);
         return v.getBalance();
+   }
+   
+   function getVault() public view returns(address) {
+        return vault;
    }
 
 
@@ -39,7 +43,7 @@ contract AirRewards is Pausable {
 	  uint256 reporter_rewards = rewards[_reporter];
 	  uint256 is_rewarded = reporter_rewards.mod(prize);
 	  Vault v = Vault(vault);
-	  if (is_rewarded == 0) v.withdrawEth(2.26e16, _reporter);
+	  if (is_rewarded == 0) v.withdrawEth(1.26e17, _reporter);
 	  emit Reward(rewards[_reporter], _reporter);
     }
 
@@ -50,7 +54,7 @@ contract AirRewards is Pausable {
 	  exist[_reporter] = true;
 	  emit ReporterAdded(_reporter);
 	  Vault v = Vault(vault);
-	  v.withdrawEth(1.26e16, _reporter);
+	  v.withdrawEth(1.26e17, _reporter);
 
     }
 
