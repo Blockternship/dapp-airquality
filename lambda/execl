@@ -1,4 +1,0 @@
-rm -rf tx.zip
-zip -r tx.zip node_modules package.json config.js index.js abi.json
-echo 'uploading'
-./update.sh dryingPOST
