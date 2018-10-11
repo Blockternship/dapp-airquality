@@ -1,18 +1,22 @@
 import Layout from '../index.js'
 import React from 'react'
-import Link from 'next/link'
-
-
-export default () =>
+import Dapp from './dapp'
+import Web3Container from '../lib/Web3Container'
+import fetch from 'isomorphic-unfetch'
+import { Form,  Input, Button, Card, Col, Row } from 'antd'
+const FormItem = Form.Item
+export default () => (
 <Layout>
- <div>
-    <h1>Home</h1>
-    <p>Note that Web3 is not loaded for this page.</p>
-    <div><Link href='/dapp'><a>My Dapp</a></Link></div>
-    <div><Link href='/accounts'><a>My Accounts</a></Link></div>
+  <div>
+    <p>AIR Quality DAPP</p>
+     <Web3Container
+    renderLoading={() => <div>Loading Dapp Page...</div>}
+    render={({ web3, accounts, contract }) => (
+      <Dapp accounts={accounts} contract={contract} web3={web3} />
+    )}
+  />
   </div>
-</Layout>
-
- 
+  </Layout>
+)
 
 

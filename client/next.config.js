@@ -9,6 +9,6 @@ if (typeof require !== 'undefined') {
 module.exports = withLess({
   lessLoaderOptions: {
     javascriptEnabled: true,
-  },
+  }
 })
 

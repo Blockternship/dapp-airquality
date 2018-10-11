@@ -1,25 +1,24 @@
-import Layout from '../index.js'
 import React from 'react'
-import Link from 'next/link'
-import Web3Container from '../lib/Web3Container'
 import fetch from 'isomorphic-unfetch'
 import { Form,  Input, Button, Card, Col, Row } from 'antd'
 const FormItem = Form.Item
 
-class Dapp extends React.Component {
+export default class Dapp extends React.Component {
   state = {
     balance: undefined,
     ethBalance: undefined,
     eprice:undefined,
     inputC:undefined,
     inputF:undefined,
-    inputfield:undefined
+    inputfield:undefined,
+    contractAddress:undefined
   };
   
   async componentDidMount () {
       this.getEthRates()
       this.getValue()
       this.getEthBalance()
+      this.getVaultAddress()
   }
 
 
@@ -41,10 +40,10 @@ class Dapp extends React.Component {
     alert('Stored 5 into account')
   };
   
-  getReportBalance = async () => {
+  getVaultAddress = async () => {
     const { accounts, contract } = this.props
-    const response =  await contract.methods.getReportBalance("0x185234ba42d395e1d7fa04e273005d54c8a690c0").call({ from: accounts[0] })
-    this.setState({ balance: response })
+    const response =  await contract.methods.getVault().call({ from: accounts[0] })
+    this.setState({ contractAddress: response })
   };
 
   getEthRates = async () => {
@@ -71,9 +70,8 @@ class Dapp extends React.Component {
   };
 
   render () {
-    const { balance = 'N/A', ethBalance = 'N/A',eprice = 0, inputC ='N/A' } = this.state
+    const { balance = 'N/A', ethBalance = 'N/A',eprice = 0, inputC ='N/A', contractAddress = '0x' } = this.state
     return (
- <Layout>
     <div style={{ marginTop: 100 }}>
       <Form layout='horizontal'>
 	 <FormItem
@@ -85,24 +83,14 @@ class Dapp extends React.Component {
 
 	</FormItem>
 
-        <FormItem
-          label='Input Address of reporter '
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 8 }}
-        >
-		<Input onChange={this.updateInputValue} style={{ width: '50%' }} defaultValue="input content" />
-
-		<Button onClick={this.addReporter} type="primary" size='large'>Add reporter</Button>
-        </FormItem>
-	
 	<FormItem
           label=' Perks '
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 8 }}
         >
-		<Button onClick={ ()=> this.depositValue(1)} type="primary" size='large'>Deposit 10</Button>
-		<Button onClick={()=> this.depositValue(2)} type="primary" size='large'>Deposit 20 </Button>
-		<Button onClick={()=> this.depositValue(5)} type="primary" size='large'>Deposit 40</Button>
+		<Button onClick={ ()=> this.depositValue(10)} type="primary" size='large'>Deposit 10</Button>
+		<Button onClick={()=> this.depositValue(40)} type="primary" size='large'>Deposit 40 </Button>
+		<Button onClick={()=> this.depositValue(100)} type="primary" size='large'>Deposit 100</Button>
         </FormItem>
 
 	 <FormItem
@@ -110,22 +98,15 @@ class Dapp extends React.Component {
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 8 }} 
 	 >
-		<Card title="Air Quality Vaul" >{balance} ETH </Card>
-		<Card title="Eth usd" >Ether USD: {eprice}</Card>
+		<Card title="Air Quality Vault Address" >{contractAddress} </Card>
+		<Card title="Air Quality Vault Balance" >{balance} ETH </Card>
+		<Card title="USD ETH Price " >Ether USD: {eprice}</Card>
 
 	</FormItem>
       </Form>
     </div>
-  </Layout>
     )
   }
 }
 
-export default () => (
-  <Web3Container
-    renderLoading={() => <div>Loading Dapp Page...</div>}
-    render={({ web3, accounts, contract }) => (
-      <Dapp accounts={accounts} contract={contract} web3={web3} />
-    )}
-  />
-)
+

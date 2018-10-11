@@ -43,7 +43,7 @@ contract AirRewards is Pausable {
 	  uint256 reporter_rewards = rewards[_reporter];
 	  uint256 is_rewarded = reporter_rewards.mod(prize);
 	  Vault v = Vault(vault);
-	  if (is_rewarded == 0) v.withdrawEth(1.26e17, _reporter);
+	  if (is_rewarded == 0) v.withdrawEth(1.42e16, _reporter);
 	  emit Reward(rewards[_reporter], _reporter);
     }
 
@@ -54,7 +54,7 @@ contract AirRewards is Pausable {
 	  exist[_reporter] = true;
 	  emit ReporterAdded(_reporter);
 	  Vault v = Vault(vault);
-	  v.withdrawEth(1.26e17, _reporter);
+	  v.withdrawEth(20.1e16, _reporter);
 
     }
 
