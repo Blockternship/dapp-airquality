@@ -16,8 +16,8 @@ To Achieve our we stated building 3 core components, and this is the description
 * Create Eth wallet in android
 * “Frictionless” Subscription github api integration. 
 * Air quality reports
-* Current production version integration [(branch:rewards.crypto](https://github.com/kike-canaries/android-hpma115s0/tree/rewards.crypto) (missing code reviews)
-* Integrate parity signer to create wallets (not used, instead using java web3 library)
+* Current production version integration [branch: rewards.crypto](https://github.com/kike-canaries/android-hpma115s0/tree/rewards.crypto) (missing code reviews)
+* Integrate parity signer to create wallets (not used, instead java web3 library)
  
 
 
@@ -26,7 +26,7 @@ To Achieve our we stated building 3 core components, and this is the description
 * Donors Vault. used next(react based) frontend framework. 
 ![](https://github.com/Blockternship/dapp-airquality/raw/dapp/vault%20doners.png)
 * Reward system initial logic (Solidity smart contract)
-* “Frictionless” Subscription with webhoook and lambda:  trigger a lambda function for initial funds transfer, after reporters validation from a github issue been closed. 
+* “Frictionless” Subscription with webhoook and lambda:  trigger a lambda function for initial funds transfer, after reporters validation from a github issue being closed. 
 ![](https://github.com/Blockternship/dapp-airquality/raw/dapp/issues.png)
 * demo website: https://out-eywlrffuet.now.sh/
 
@@ -47,9 +47,3 @@ https://github.com/kike-canaries
 
 * And some of our tutorials tutorials
 https://www.hackster.io/114723/canairio-red-ciudadana-para-monitoreo-de-calidad-del-aire-96f79a
-
-
-
-
-
-
