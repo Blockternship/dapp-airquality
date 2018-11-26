@@ -13,12 +13,11 @@ To Achieve our we stated building 3 core components, and this is the description
 
 ## Android 
 ![](https://github.com/Blockternship/dapp-airquality/raw/dapp/canario_android.jpg)
-* Create eth wallet. 
+* Create Eth wallet in android
 * “Frictionless” Subscription github api integration. 
 * Air quality reports
-* Current production version integration branch:rewards.crypto missing code reviews. 
-* https://github.com/kike-canaries/android-hpma115s0/tree/rewards.crypto
-* Integrate parity signer to create wallets (not used)
+* Current production version integration [(branch:rewards.crypto](https://github.com/kike-canaries/android-hpma115s0/tree/rewards.crypto) (missing code reviews)
+* Integrate parity signer to create wallets (not used, instead using java web3 library)
  
 
 
