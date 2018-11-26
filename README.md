@@ -37,13 +37,16 @@ we tested and integrated part of the contracts call on ESP32, thich is the micro
 
 
 
-this is our website (at this moment is still in spanish)
+# CanAirIO
+Some important info about our project
+
+* This is our website (at this moment is still in spanish)
 http://canair.io/
 
-our  repository: 
+* Our  repository: 
 https://github.com/kike-canaries
 
-and some of our tutorials tutorials:
+* And some of our tutorials tutorials
 https://www.hackster.io/114723/canairio-red-ciudadana-para-monitoreo-de-calidad-del-aire-96f79a
 
 
