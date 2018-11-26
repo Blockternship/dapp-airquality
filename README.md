@@ -1,5 +1,5 @@
 
-# dapp-airquality (work in progress)
+# Blockternship submission air quality dApp CanAirIO 
 
 Our initial **goal** was:
 
