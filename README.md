@@ -8,7 +8,7 @@ Create a public health air-quality Dapp where users can report air pollution wit
 This is part of our contributions to CanAirIO which is a citizen science initiative for air quality tracking, visualization and dissemination
 
 
-To achieve our goal we stated building 3 core components, and this is the description of our progress:  
+To achieve our goal we started building 3 core components(Android, Frontend and ESP32), and this is the current state of our progress on them:  
 
 
 ## Android 
